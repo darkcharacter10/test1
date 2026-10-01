@@ -1,0 +1,340 @@
+/*
+   FILE: app/globals.css
+   GLOBAL STYLES: Tailwind layers, base styles, keyframe animations, Leaflet overrides, and the shared
+   animated-button system (.btn-anim, .web-app-btn). Class names used here are referenced inside components.
+ */
+
+
+/* Smooth scrolling for in-page anchors (e.g. 'Learn More' → #how-it-works). */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Default page background + text color (cream / dark brown). */
+body {
+  background: #fff8f0;
+  color: #2d2420;
+  /* RESPONSIVE SAFETY NET: if any element is ever wider than the screen, never show a sideways scrollbar.
+     `clip` (unlike `hidden`) doesn't break position: sticky. */
+  overflow-x: clip;
+}
+/* Stop iOS Safari from auto-enlarging text when the phone is rotated. */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+/* Anchor jumps (e.g. #how-it-works) shouldn't hide the heading under the fixed navbar. */
+section[id] {
+  scroll-margin-top: 5rem;
+}
+/* Media should never overflow its box. */
+img,
+svg,
+video {
+  max-width: 100%;
+}
+
+/* Text-selection highlight color. */
+::selection {
+  background: #ffd4b2;
+  color: #2d2420;
+}
+
+/* Custom scrollbar - kept subtle, matches the warm palette */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #fff8f0;
+}
+::-webkit-scrollbar-thumb {
+  background: #f4a261;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #e07b39;
+}
+
+/* ===== Live pulse dot, reused across badges/markers ===== */
+/* Red pulse ring animation. Used by .pulse-dot (Hero 'Live Protection Active' badge). */
+@keyframes pulseDot {
+  0% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(220, 38, 38, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+  }
+}
+.pulse-dot {
+  position: relative;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #dc2626;
+  animation: pulseDot 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+/* Static green variant of the dot (no animation). */
+.pulse-dot--success {
+  background: #2d6a4f;
+  animation: none;
+}
+
+/* Slow up/down float — used by the floating badges in Hero (.float-soft). */
+@keyframes softFloat {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+.float-soft {
+  animation: softFloat 6s ease-in-out infinite;
+}
+
+/* ===== Hero cow photo — organic "blob" frame + hover morph, matches the original site ===== */
+.hero-cow-wrap {
+  border-radius: 40% 60% 60% 40% / 60% 40% 60% 40%;
+  transition: border-radius 0.8s ease;
+}
+.hero-cow-wrap:hover {
+  border-radius: 45% 55% 55% 45% / 55% 45% 55% 45%;
+}
+
+/* ===== Leaflet overrides so the map matches the brand ===== */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  font-family: 'Inter', sans-serif;
+  background: #faf5ef;
+}
+/* Rounded popup + soft shadow to match the site style. */
+.leaflet-popup-content-wrapper {
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(224, 123, 57, 0.18);
+}
+.leaflet-popup-tip {
+  box-shadow: none;
+}
+.leaflet-control-zoom a {
+  color: #2d2420 !important;
+  border-radius: 10px !important;
+}
+/* Standard OSM tiles are quite saturated/busy on their own — this mutes
+   them into a calmer, more "command center" look without needing any
+   paid/keyed basemap provider. */
+.leaflet-tile-pane {
+  filter: saturate(0.55) brightness(1.08) contrast(0.95) sepia(0.06);
+}
+/* Map markers created in LiveMap.tsx (markerIcon): red = active/in-progress, green = resolved. */
+.gd-marker-alert {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #dc2626;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.25);
+}
+.gd-marker-resolved {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #2d6a4f;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 4px rgba(45, 106, 79, 0.2);
+}
+
+/* Reduced motion: respect user preference across the site */
+/* Accessibility: shorten all animations/transitions for users who ask for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* =====================================================================
+   PROFESSIONAL BUTTON MOTION SYSTEM
+   Shared "signature" interaction for every button/CTA on the site,
+   modeled on Google's "AI Mode" pill: NO sliding sheen — instead a
+   thin animated light that travels around the button's own border
+   (conic-gradient masked down to a ring, brand-orange instead of
+   rainbow) plus a soft frosted/glass ambient halo behind it, and a
+   gentle lift on hover. Add `.btn-anim` to any button/link alongside
+   its existing Tailwind classes; `.btn-anim--ghost` is still used to
+   mark outline/white buttons (kept for the darker press tint).
+   ===================================================================== */
+@property --btn-ring-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+.btn-anim {
+  position: relative;
+  isolation: isolate;
+  will-change: transform, box-shadow;
+  box-shadow: 0 6px 16px -8px rgba(224, 123, 57, 0.3), 0 0 14px rgba(224, 123, 57, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.7s cubic-bezier(0.22, 1, 0.36, 1), filter 0.4s ease;
+}
+/* Thin white edge for the solid/orange buttons only (Report a Sighting,
+   See Live Tracker, Submit Report, Web App) — NOT used on ghost/outline
+   buttons (Learn More, Contact Us) or the white CTA button, which keep
+   their own border/no-border look untouched. The traveling ring below
+   rides on top of this white line. */
+.btn-anim--solid {
+  border: 1.5px solid rgba(255, 255, 255, 0.55);
+}
+/* The traveling border light — a conic gradient, masked down to a thin
+   ring that hugs the button's own rounded outline (padding = ring
+   thickness), so it reads as light moving along the edge rather than a
+   glow behind the shape. */
+.btn-anim::after {
+  content: '';
+  position: absolute;
+  inset: -1.5px;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(
+    from var(--btn-ring-angle),
+    transparent 0deg,
+    transparent 300deg,
+    rgba(255, 216, 168, 0.9) 330deg,
+    rgba(224, 123, 57, 0.95) 345deg,
+    rgba(200, 75, 49, 0.85) 355deg,
+    transparent 360deg
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  filter: blur(0.4px);
+  transition: opacity 0.5s ease;
+}
+.btn-anim:hover::after {
+  opacity: 1;
+  animation: btnRingSpin 3.6s linear infinite;
+}
+@keyframes btnRingSpin {
+  to {
+    --btn-ring-angle: 360deg;
+  }
+}
+/* Soft frosted halo behind the button + a gentle lift — this is the
+   "glass morphism" ambient glow around it, brand-orange only */
+.btn-anim:hover {
+  transform: translateY(-3px);
+  animation: btnGlowBreathe 4.2s ease-in-out infinite;
+}
+@keyframes btnGlowBreathe {
+  0%,
+  100% {
+    box-shadow: 0 10px 28px -8px rgba(224, 123, 57, 0.42),
+      0 0 26px rgba(224, 123, 57, 0.32), 0 0 48px rgba(232, 163, 61, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  }
+  50% {
+    box-shadow: 0 16px 42px -6px rgba(224, 123, 57, 0.6),
+      0 0 42px rgba(224, 123, 57, 0.48), 0 0 74px rgba(232, 163, 61, 0.32),
+      inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  }
+}
+.btn-anim:active {
+  transform: translateY(-1px) scale(0.97);
+  filter: brightness(0.86) saturate(0.95);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.25s ease;
+}
+.btn-anim--ghost:active {
+  filter: brightness(0.94);
+  background-color: rgba(224, 123, 57, 0.06);
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn-anim::after {
+    animation: none;
+  }
+}
+
+/* =====================================================================
+   "Web App" download button's own dedicated glow — a warm rotating
+   gradient halo blurred behind the pill (kept on this button only: it
+   only reads cleanly on a solid saffron background, since the halo
+   paints between the button's own background and its z-10 text/icon —
+   on a white or transparent button that showed through as an unwanted
+   "glow inside" the pill, so the rest of the CTAs use only the safe,
+   outside-only box-shadow glow from `.btn-anim` above instead).
+   ===================================================================== */
+.web-app-btn {
+  isolation: isolate;
+  transition: filter 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.web-app-btn.is-active {
+  filter: brightness(0.8) saturate(1.05);
+}
+.web-app-glow {
+  position: absolute;
+  inset: -7px;
+  z-index: -1;
+  border-radius: 9999px;
+  background: linear-gradient(45deg, #e07b39, #f4a261, #e8a33d, #c84b31, #e07b39);
+  background-size: 300% 300%;
+  filter: blur(16px);
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  animation: webAppGlowShift 12s linear infinite;
+}
+.web-app-btn:hover .web-app-glow,
+.web-app-btn:focus-visible .web-app-glow,
+.web-app-btn.is-active .web-app-glow {
+  opacity: 0.95;
+}
+.web-app-btn.is-active .web-app-glow {
+  opacity: 1;
+  inset: -9px;
+  filter: blur(20px);
+  animation: webAppGlowShift 5s linear infinite;
+}
+@keyframes webAppGlowShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .web-app-glow {
+    animation: none;
+  }
+}
+
+/* ---- replacements for framer-motion ---- */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.4,0,.2,1),transform .7s cubic-bezier(.4,0,.2,1)}
+.reveal.in{opacity:1;transform:none}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.fade-up{animation:fadeUp .8s cubic-bezier(.4,0,.2,1) both}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{animation:spin 1s linear infinite}
+#preloader{transition:opacity .6s ease-in-out}
+#preloader.hide{opacity:0;pointer-events:none}
+#drawer{transition:transform .45s cubic-bezier(.22,1,.36,1)}
+#drawer.closed{transform:translateX(100%)}
+.modal-card{animation:fadeUp .4s cubic-bezier(.22,1,.36,1) both}
+@keyframes particle{0%{opacity:0;transform:translate(0,0) scale(.3)}30%{opacity:.9}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.5)}}
+.particle{position:absolute;left:50%;top:50%;border-radius:9999px;animation:particle 1.6s cubic-bezier(.22,1,.36,1) forwards}

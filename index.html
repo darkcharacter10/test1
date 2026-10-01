@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#FFF8F0" />
+  <title>Gau Drishti — AI-Powered Animal Safety</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Capriola&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="js/tailwind-config.js"></script>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="font-sans">
+  <div id="preloader" class="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-cream">
+    <div class="spin h-16 w-16 rounded-full border-4 border-peach border-t-saffron"></div>
+    <div class="mt-6 font-display text-2xl tracking-wide text-ink-dark">Gau Drishti</div>
+    <div class="mt-2 text-sm text-ink-light">Loading compassionate technology...</div>
+  </div>
+  <div id="navbar"></div>
+  <main id="app"></main>
+  <div id="footer"></div>
+  <div id="modal-root"></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
